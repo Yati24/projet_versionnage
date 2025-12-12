@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="text-center mt-4">
+    {% if current_user.is_authenticated %}
+        <h2>Bonjour {{ current_user.username }}</h2>
+        <p class="text-muted">Bienvenue sur l'application Vacances.</p>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary m-2">Mes Albums</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger m-2">Déconnexion</a>
+    {% else %}
+        <h2>Bonjour invité</h2>
+        <p class="text-muted">Connectez-vous pour gérer vos albums et partager des photos.</p>
+        <a href="{{ url_for('login') }}" class="btn btn-success m-2">Connexion</a>
+    {% endif %}
+</div>
+{% endblock %}

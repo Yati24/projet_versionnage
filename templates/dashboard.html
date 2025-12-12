@@ -1,4 +1,16 @@
 {% extends "layout.html" %}
 {% block content %}
-<h2>Bienvenue sur votre espace</h2>
+<h2>Mes Albums</h2>
+<form action="/create_album" method="POST" class="d-flex gap-2 mb-3">
+    <input type="text" name="name" class="form-control" placeholder="Nouvel album">
+    <button class="btn btn-success">+</button>
+</form>
+<ul class="list-group">
+    {% for album in albums %}
+    <li class="list-group-item d-flex justify-content-between">
+        <a href="/album/{{ album.id }}">{{ album.name }}</a>
+        <a href="/delete_album/{{ album.id }}" class="text-danger">Supprimer</a>
+    </li>
+    {% endfor %}
+</ul>
 {% endblock %}

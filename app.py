@@ -25,6 +25,12 @@ class Album(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('albums', lazy=True))
 
+class Photo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(100), nullable=False)
+    album_id = db.Column(db.Integer, db.ForeignKey('album.id'), nullable=False)
+    album = db.relationship('Album', backref=db.backref('photos', lazy=True))
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -84,6 +90,19 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+@app.route('/album/<int:id>', methods=['GET', 'POST'])
+@login_required
+def view_album(id):
+    album = Album.query.get_or_404(id)
+    if request.method == 'POST':
+        f = request.files['photo']
+        if f:
+            filename = secure_filename(f.filename)
+            f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            db.session.add(Photo(filename=filename, album_id=album.id))
+            db.session.commit()
+    return render_template('album.html', album=album)
 
 if __name__ == '__main__':
     with app.app_context():

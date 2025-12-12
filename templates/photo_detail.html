@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block content %}
+<a href="/album/{{ photo.album_id }}">Retour</a>
+<div class="text-center mb-3">
+    <img src="/static/uploads/{{ photo.filename }}" class="img-fluid" style="max-height:400px">
+</div>
+<h4>Commentaires</h4>
+<ul class="list-group mb-3">
+    {% for c in photo.comments %}
+    <li class="list-group-item"><b>{{ c.user.username }}:</b> {{ c.content }}</li>
+    {% endfor %}
+</ul>
+<form method="POST">
+    <input type="text" name="content" placeholder="Ecrire un commentaire..." required class="form-control">
+    <button class="btn btn-primary mt-2">Envoyer</button>
+</form>
+{% endblock %}

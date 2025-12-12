@@ -31,6 +31,14 @@ class Photo(db.Model):
     album_id = db.Column(db.Integer, db.ForeignKey('album.id'), nullable=False)
     album = db.relationship('Album', backref=db.backref('photos', lazy=True))
 
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String(200), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    photo_id = db.Column(db.Integer, db.ForeignKey('photo.id'))
+    user = db.relationship('User')
+    photo = db.relationship('Photo', backref=db.backref('comments', lazy=True))
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -113,6 +121,16 @@ def delete_photo(id):
         db.session.commit()
         return redirect(url_for('view_album', id=photo.album_id))
     return "Interdit"
+
+@app.route('/photo/<int:id>', methods=['GET', 'POST'])
+@login_required
+def photo_detail(id):
+    photo = Photo.query.get_or_404(id)
+    if request.method == 'POST':
+        db.session.add(Comment(content=request.form.get('content'), user_id=current_user.id, photo_id=id))
+        db.session.commit()
+    return render_template('photo_detail.html', photo=photo)
+
 
 if __name__ == '__main__':
     with app.app_context():

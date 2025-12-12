@@ -1,5 +1,11 @@
 {% extends "layout.html" %}
 {% block content %}
+{% if album.user_id == current_user.id %}
+<form action="/share/{{ album.id }}" method="POST" class="input-group w-50 mb-3">
+    <input type="text" name="username" placeholder="Pseudo ami..." class="form-control">
+    <button class="btn btn-warning">Partager</button>
+</form>
+{% endif %}
 <h2>{{ album.name }}</h2>
 <form method="POST" enctype="multipart/form-data" class="mb-3 border p-2">
     <input type="file" name="photo" required>

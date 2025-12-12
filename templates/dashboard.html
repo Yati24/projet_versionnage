@@ -13,4 +13,15 @@
     </li>
     {% endfor %}
 </ul>
+
+<hr>
+<h3>Partagés avec moi</h3>
+<ul class="list-group">
+    {% for album in shared %}
+    <li class="list-group-item">
+        <a href="/album/{{ album.id }}">{{ album.name }} (de {{ album.user.username }})</a>
+    </li>
+    {% endfor %}
+</ul>
+
 {% endblock %}

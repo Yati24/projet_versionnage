@@ -13,6 +13,12 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+shared_albums = db.Table('shared_albums',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('album_id', db.Integer, db.ForeignKey('album.id'))
+)
+
+
 # --- db ---
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -24,6 +30,7 @@ class Album(db.Model):
     name = db.Column(db.String(100), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('albums', lazy=True))
+    shared_with = db.relationship('User', secondary=shared_albums, backref='shared_albums')
 
 class Photo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -64,7 +71,9 @@ def register():
 @login_required
 def dashboard():
     albums = Album.query.filter_by(user_id=current_user.id).all()
-    return render_template('dashboard.html', albums=albums)
+    shared = current_user.shared_albums # Nouveauté
+    return render_template('dashboard.html', albums=albums, shared=shared)
+
 
 @app.route('/create_album', methods=['POST'])
 @login_required
@@ -130,6 +139,17 @@ def photo_detail(id):
         db.session.add(Comment(content=request.form.get('content'), user_id=current_user.id, photo_id=id))
         db.session.commit()
     return render_template('photo_detail.html', photo=photo)
+
+@app.route('/share/<int:id>', methods=['POST'])
+@login_required
+def share_album(id):
+    album = Album.query.get(id)
+    user = User.query.filter_by(username=request.form.get('username')).first()
+    if album.user_id == current_user.id and user:
+        album.shared_with.append(user)
+        db.session.commit()
+    return redirect(url_for('view_album', id=id))
+
 
 
 if __name__ == '__main__':

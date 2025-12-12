@@ -11,6 +11,7 @@
         <img src="/static/uploads/{{ photo.filename }}" class="img-fluid rounded shadow-sm">
         <div class="mt-1">
             <a href="/photo/{{ photo.id }}" class="btn btn-info btn-sm">Voir</a>
+            <a href="/delete_photo/{{ photo.id }}" class="btn btn-danger btn-sm">X</a>
         </div>
     </div>
     {% endfor %}

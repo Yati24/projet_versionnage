@@ -104,6 +104,16 @@ def view_album(id):
             db.session.commit()
     return render_template('album.html', album=album)
 
+@app.route('/delete_photo/<int:id>')
+@login_required
+def delete_photo(id):
+    photo = Photo.query.get(id)
+    if photo.album.user_id == current_user.id:
+        db.session.delete(photo)
+        db.session.commit()
+        return redirect(url_for('view_album', id=photo.album_id))
+    return "Interdit"
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

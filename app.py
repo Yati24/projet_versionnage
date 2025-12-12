@@ -19,11 +19,19 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
 
+class Album(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('albums', lazy=True))
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
 # --- routes ---
+
 @app.route('/')
 def home():
     return render_template('home.html')
@@ -37,6 +45,30 @@ def register():
         login_user(user)
         return redirect(url_for('home'))
     return render_template('register.html')
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    albums = Album.query.filter_by(user_id=current_user.id).all()
+    return render_template('dashboard.html', albums=albums)
+
+@app.route('/create_album', methods=['POST'])
+@login_required
+def create_album():
+    name = request.form.get('name')
+    if name:
+        db.session.add(Album(name=name, user_id=current_user.id))
+        db.session.commit()
+    return redirect(url_for('dashboard'))
+
+@app.route('/delete_album/<int:id>')
+@login_required
+def delete_album(id):
+    album = Album.query.get(id)
+    if album.user_id == current_user.id:
+        db.session.delete(album)
+        db.session.commit()
+    return redirect(url_for('dashboard'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
